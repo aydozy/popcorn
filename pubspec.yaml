@@ -53,6 +53,9 @@ flutter:
 
   assets:
     - .env
+    - assets/images/splash/
+    - assets/images/onboarding/
+    - assets/images/characters/
 
   fonts:
     - family: Fraunces

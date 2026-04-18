@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailScreen extends StatelessWidget {
   final int movieId;
-  const DetailPage({super.key, required this.movieId});
+  const DetailScreen({super.key, required this.movieId});
 
   @override
   Widget build(BuildContext context) {

@@ -12,3 +12,4 @@ const String backdropLarge = 'w1280';
 const String imageOriginal = 'original';
 
 const String watchlistBoxName = 'watchlist_box';
+const String settingsBox = 'settings_box';
