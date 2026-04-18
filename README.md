@@ -1,12 +1,17 @@
 # 🍿 Popcorn
 
+![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
+![Bloc](https://img.shields.io/badge/State-Bloc-02569B)
+![Status](https://img.shields.io/badge/Status-In_Development-orange)
+
 A modern Flutter movie discovery app. Browse trending films, build a personal watchlist, and find your next favorite — powered by [TMDB](https://www.themoviedb.org/).
 
 > 📝 **New here? Start with the API key.**
 > Popcorn needs a free TMDB v4 read‑access token. I wrote a step‑by‑step guide that walks you through the whole thing, even if you haven't created the project yet:
 > **[How to get a TMDB API key (even if your project doesn't exist yet)](https://medium.com/@ozyurek.aydanil/how-to-get-a-tmdb-api-key-even-if-your-project-doesnt-exist-yet-fae8845f00c6)** — Medium
 
-**Status:** 🚧 Actively developed. Splash, onboarding, home discovery, and watchlist shipped. Detail and search are next.
+**Status:** 🚧 Actively developed. Splash, onboarding, home discovery, and watchlist completed. Detail and search are next.
 
 ---
 
@@ -19,8 +24,8 @@ A modern Flutter movie discovery app. Browse trending films, build a personal wa
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="280" alt="Home — hero carousel and horizontal sections" />
-  <img src="docs/screenshots/movies_list.png" width="280" alt="Movies list — 'See all' destination" />
+  <img src="docs/screenshots/home.png" width="220" alt="Home — hero carousel and horizontal sections" />
+  <img src="docs/screenshots/movies_list.png" width="220" alt="Movies list — 'See all' destination" />
 </p>
 
 ---
@@ -267,8 +272,3 @@ Files are already in the repo; no download needed.
 - Fonts: [Fraunces](https://fonts.google.com/specimen/Fraunces) and [Inter](https://fonts.google.com/specimen/Inter), SIL Open Font License.
 - Popcorn character illustrations — custom assets.
 
----
-
-## License
-
-MIT (TBD)
