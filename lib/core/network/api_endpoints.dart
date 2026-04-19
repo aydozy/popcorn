@@ -3,6 +3,7 @@ abstract final class ApiEndpoints {
   static const String popular = '/movie/popular';
   static const String topRated = '/movie/top_rated';
   static const String search = '/search/movie';
+  static const String discover = '/discover/movie';
   static const String movieGenres = '/genre/movie/list';
 
   static String movieDetail(int id) => '/movie/$id';

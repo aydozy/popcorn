@@ -15,7 +15,8 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env');
   await Hive.initFlutter();
   await Hive.openBox(settingsBox);
-  await Hive.openBox(watchlistBoxName);
+  await Hive.openBox(watchlistBox);
+  await Hive.openBox(genreBackdropsBox);
   configureDependencies();
   runApp(const PopcornApp());
 }

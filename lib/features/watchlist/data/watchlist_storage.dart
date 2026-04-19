@@ -5,7 +5,7 @@ import '../../home/data/models/movie_model.dart';
 import '../../home/domain/entities/movie.dart';
 
 class WatchlistStorage {
-  Box<dynamic> get _box => Hive.box(watchlistBoxName);
+  Box<dynamic> get _box => Hive.box(watchlistBox);
 
   bool contains(int movieId) => _box.containsKey(movieId);
 

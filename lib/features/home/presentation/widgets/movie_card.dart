@@ -32,21 +32,24 @@ class MovieCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: movie.posterUrl.isEmpty
-                      ? _emptyPoster()
-                      : CachedNetworkImage(
-                          imageUrl: movie.posterUrl,
-                          width: width,
-                          height: height,
-                          fit: BoxFit.cover,
-                          placeholder: (BuildContext context, String url) =>
-                              _shimmerPlaceholder(),
-                          errorWidget: (BuildContext context, String url,
-                                  Object error) =>
-                              _emptyPoster(),
-                        ),
+                Hero(
+                  tag: 'movie_poster_${movie.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: movie.posterUrl.isEmpty
+                        ? _emptyPoster()
+                        : CachedNetworkImage(
+                            imageUrl: movie.posterUrl,
+                            width: width,
+                            height: height,
+                            fit: BoxFit.cover,
+                            placeholder: (BuildContext context, String url) =>
+                                _shimmerPlaceholder(),
+                            errorWidget: (BuildContext context, String url,
+                                    Object error) =>
+                                _emptyPoster(),
+                          ),
+                  ),
                 ),
                 Positioned(
                   top: 6,

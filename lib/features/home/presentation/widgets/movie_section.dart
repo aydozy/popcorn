@@ -14,6 +14,7 @@ class MovieSection extends StatelessWidget {
   final Widget Function(List<Movie>) builder;
   final Widget loadingPlaceholder;
   final VoidCallback? onSeeAllTap;
+  final Widget? titleBadge;
 
   const MovieSection({
     required this.title,
@@ -23,6 +24,7 @@ class MovieSection extends StatelessWidget {
     required this.builder,
     required this.loadingPlaceholder,
     this.onSeeAllTap,
+    this.titleBadge,
     super.key,
   });
 
@@ -36,18 +38,38 @@ class MovieSection extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(title, style: AppTextStyles.titleLarge),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: AppTextStyles.titleLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (titleBadge != null) ...[
+                      const SizedBox(width: 8),
+                      titleBadge!,
+                    ],
+                  ],
+                ),
               ),
               if (onSeeAllTap != null)
-                GestureDetector(
-                  onTap: onSeeAllTap,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      'See all →',
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.primaryRose,
+                Semantics(
+                  button: true,
+                  label: 'See all $title',
+                  child: GestureDetector(
+                    onTap: onSeeAllTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      child: Text(
+                        'See all →',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: AppColors.primaryRose,
+                        ),
                       ),
                     ),
                   ),

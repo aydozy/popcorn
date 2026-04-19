@@ -3,43 +3,88 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
 ![Bloc](https://img.shields.io/badge/State-Bloc-02569B)
-![Status](https://img.shields.io/badge/Status-In_Development-orange)
+![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-10B981)
+![Status](https://img.shields.io/badge/Status-Feature_Complete-10B981)
 
-A modern Flutter movie discovery app. Browse trending films, build a personal watchlist, and find your next favorite — powered by [TMDB](https://www.themoviedb.org/).
+A modern Flutter movie discovery app. Browse trending films, explore genres, search, build a personal watchlist, and dive into rich movie details — all powered by [TMDB](https://www.themoviedb.org/).
 
 > 📝 **New here? Start with the API key.**
-> Popcorn needs a free TMDB v4 read‑access token. I wrote a step‑by‑step guide that walks you through the whole thing, even if you haven't created the project yet:
+> Popcorn needs a free TMDB v4 read-access token. I wrote a step-by-step guide that walks you through the whole thing, even if you haven't created the project yet:
 > **[How to get a TMDB API key (even if your project doesn't exist yet)](https://medium.com/@ozyurek.aydanil/how-to-get-a-tmdb-api-key-even-if-your-project-doesnt-exist-yet-fae8845f00c6)** — Medium
 
-**Status:** 🚧 Actively developed. Splash, onboarding, home discovery, and watchlist completed. Detail and search are next.
+**Status:** ✅ Feature-complete across the five core flows — splash, onboarding, home discovery, movie detail, search, and watchlist. Focus now is polish + tests.
 
 ---
 
 ## ✨ Screenshots
 
+### Splash + Onboarding
+
 <p align="center">
-  <img src="docs/screenshots/splash.png" width="220" alt="Splash screen" />
+  <img src="docs/screenshots/splash.png" width="220" alt="Splash — animated logo with gold/red glow" />
   <img src="docs/screenshots/onboarding_1.png" width="220" alt="Onboarding slide 1" />
   <img src="docs/screenshots/onboarding_2.png" width="220" alt="Onboarding slide 2" />
 </p>
 
+Animated splash reads the onboarding flag from Hive and routes accordingly. Returning users skip straight to Home.
+
+### Home
+
 <p align="center">
-  <img src="docs/screenshots/home.png" width="220" alt="Home — hero carousel and horizontal sections" />
+  <img src="docs/screenshots/home.png" width="220" alt="Home — hero carousel and sections" />
+  <img src="docs/screenshots/home_2.png" width="220" alt="Home — New releases grid + nav shell" />
   <img src="docs/screenshots/movies_list.png" width="220" alt="Movies list — 'See all' destination" />
 </p>
+
+Auto-advancing hero carousel (6s cadence, peek of next card, pauses on user touch) with a subtle radial rose glow behind. Three horizontal sections (Popular, Top rated) and a 2-column **New releases** grid with its own `NEW` pill + matching shimmer silhouette. Pull-to-refresh re-hits all endpoints. `See all →` pushes a dedicated Movies List screen with proper loading/error/empty branching.
+
+### Detail
+
+<p align="center">
+  <img src="docs/screenshots/detail_1.png" width="220" alt="Detail — backdrop, overlapping poster, stats" />
+  <img src="docs/screenshots/detail_2.png" width="220" alt="Detail — overview, genres, cast, similar" />
+</p>
+
+Tap any poster → Hero-animated transition into a cinematic detail screen. Backdrop header + overlapping poster, stats row (TMDB rating / likes / % liked it), expandable overview, genre pills, horizontal cast avatars (gold ring on lead, initial-letter fallback for missing photos), and a "More like this" row that reuses the Home `MovieCard`. "Add to Watchlist" is outlined when unsaved, filled gradient when saved. Three parallel TMDB calls (`/movie/:id`, `/credits`, `/similar`) load each section independently.
+
+### Search
+
+<p align="center">
+  <img src="docs/screenshots/search_genres.png" width="220" alt="Search — genre grid with real movie backdrops" />
+  <img src="docs/screenshots/search_results.png" width="220" alt="Search — debounced text results" />
+</p>
+
+Three distinct modes driven by a single `SearchBloc`:
+
+- **Idle** — an 18-genre grid where each tile uses a **real movie backdrop** fetched from `/discover/movie?with_genres=…`. A sequential + deduplicated fetch makes sure each genre shows a unique blockbuster, cached forever in Hive so subsequent opens are instant.
+- **Typing** — 400ms debounced search via `stream_transform` (`debounce.switchMap`) so stale requests can't overwrite fresh results. Each row is a dense `SearchResultItem` (poster, title, year · genre, rating, 2-line overview, inline watchlist toggle).
+- **Genre-filtered** — tap any tile → shows that genre's popular movies with an `ActiveFilterChip` to clear back to idle.
+
+Empty state uses `problem_popcorn.png`; network failure renders an inline retry with `connection_popcorn.png`.
+
+### Watchlist
+
+<p align="center">
+  <img src="docs/screenshots/watchlist.png" width="220" alt="Watchlist — 2-col poster grid with staggered entry" />
+</p>
+
+2-column poster grid with staggered fade+scale entry animation. Each poster carries the same Hero tag (`movie_poster_${id}`) as Home's `MovieCard`, so navigating Watchlist → Detail gets a shared-element transition too. Tap the bookmark chip to remove (44×44 hit target, `Semantics` labels, haptic feedback). Persisted via Hive across app restarts.
 
 ---
 
 ## Features
 
-- 🎬 **Discover** — Trending this week, Popular, and Top Rated sections, all from live TMDB data
-- 🎠 **Hero carousel** — Swipeable top‑5 with backdrop, genre badge, rating, and smooth dot indicator
-- 🔖 **Watchlist** — Add from anywhere (hero, movie card, list screen), saved locally in Hive, persists across restarts
-- ✨ **Splash + Onboarding** — Animated intro for first‑time users; flag stored in Hive so returning users go straight home
-- 🎨 **Premium dark UI** — Fraunces + Inter typography, cinema‑inspired palette (rose + gold), frosted‑glass bottom nav
-- 📱 **Responsive layouts** — Horizontal sections, vertical poster grids, intrinsic‑height rows, no broken overflows
-- 🔄 **Pull‑to‑refresh** — Re‑fetch trending/popular/top rated/genres on demand
-- 🧠 **Smart caching** — App‑wide Bloc singletons keep state across navigation; no duplicate fetches
+- 🎬 **Discover** — Trending, Popular, Top Rated sections + a 2-col New Releases grid, all from live TMDB
+- 🎠 **Auto-advancing hero** — Swipeable top-5 with peek of neighbors, pauses 4s after user interaction
+- 🔎 **Search** — Backdrop-driven genre grid + 400ms debounced text search + genre filter pill
+- 🎞️ **Detail** — Backdrop parallax, hero-animated poster, stats, expandable overview, cast row, similar movies, inline watchlist CTA
+- 🔖 **Watchlist** — Add/remove from anywhere (Home card, hero, search results, detail), saved locally in Hive, persists across restarts, shared hero transition into detail
+- ✨ **Splash + Onboarding** — Animated intro for first-time users; flag stored in Hive so returning users go straight home
+- 🎨 **Premium dark UI** — Fraunces + Inter typography, cinema-inspired palette (rose + gold), frosted-glass bottom nav, radial ambient glow on the hero
+- 📱 **Responsive layouts** — Horizontal sections, vertical poster grids, intrinsic-height rows, matching shimmer silhouettes to avoid layout shift
+- 🔄 **Pull-to-refresh** on Home
+- 🧠 **Smart caching** — App-wide Bloc singletons for Home/Watchlist keep state across navigation; Hive-cached genre backdrops never re-fetch; factory-scoped blocs for Detail/Search so each entry starts fresh
+- ♿ **Accessibility** — 44dp+ touch targets on primary actions, `Semantics` labels on back buttons, read-more, filter chips, watchlist toggles
 
 ---
 
@@ -49,22 +94,25 @@ A modern Flutter movie discovery app. Browse trending films, build a personal wa
 | Package | Purpose |
 |---|---|
 | `flutter_bloc` / `bloc` | State management (sealed events + single state per slice) |
-| `go_router` | Declarative routing, `ShellRoute` for bottom nav, deep‑linking |
+| `go_router` | Declarative routing, `ShellRoute` for bottom nav, deep-linking |
 | `get_it` | Service locator / dependency injection |
 | `dio` | HTTP with interceptors (bearer token, logging, error mapping) |
-| `hive` + `hive_flutter` | Local NoSQL persistence (onboarding flag, watchlist) |
+| `hive` + `hive_flutter` | Local NoSQL persistence (onboarding flag, watchlist, genre backdrops cache) |
 | `flutter_dotenv` | Environment variable loader |
 | `cached_network_image` | Network image caching + shimmer placeholders |
 | `shimmer` | Loading state placeholders |
+| `flutter_staggered_animations` | Grid/list entry animations (genre grid, watchlist, search results) |
+| `stream_transform` | Debounced + switch-mapped search input |
 | `equatable` | Value equality for events/states/entities |
 
 ### Dev
 `build_runner`, `hive_generator`, `bloc_test`, `mocktail`
 
 ### Not used (intentionally)
-- ❌ `injectable` — manual `getIt.registerLazySingleton` is readable and sufficient
+- ❌ `injectable` — manual `getIt.registerLazySingleton` / `registerFactory` is readable and sufficient
 - ❌ `fpdart` — we ship our own tiny sealed `Either<L, R>` in `lib/core/types/`
-- ❌ `google_fonts` — Fraunces + Inter are bundled as local `.ttf` assets for smaller dependency surface
+- ❌ `google_fonts` — Fraunces + Inter bundled as local `.ttf` assets for smaller dependency surface
+- ❌ `share_plus` — share button explicitly out of scope for MVP
 
 ### Typography
 - **[Fraunces](https://fonts.google.com/specimen/Fraunces)** — display, headlines, movie titles
@@ -76,53 +124,63 @@ Both bundled locally under `assets/fonts/`.
 
 ## Architecture
 
-Popcorn follows **Clean Architecture** pragmatically — full `data / domain / presentation` slices for feature‑heavy modules with real business logic, lightweight storage classes for simple UI/app state.
+Popcorn follows **Clean Architecture** pragmatically — full `data / domain / presentation` slices for feature-heavy modules with real business logic, lightweight storage classes for simple UI/app state.
 
 ### Decision rule
 
 > Does this feature have real domain concepts and rules?
-> - **Yes** (Home, Watchlist, future Search/Detail) → full slice
+> - **Yes** (Home, Detail, Search, Watchlist) → full slice
 > - **No** (onboarding flag, future settings flags) → single class under `lib/core/storage/`
 
-### Layer breakdown (Home as example)
+### Layer breakdown (Detail as example)
 
 ```
 Domain (pure Dart)
- ├── entities/movie.dart            Movie, Genre — Equatable
- ├── repositories/home_repository.dart   abstract contract
- └── usecases/get_*.dart             UseCase<Success, Params>
+ ├── entities/{movie_detail,cast_member}.dart     Equatable
+ ├── repositories/detail_repository.dart          abstract contract
+ └── usecases/{get_movie_detail,get_movie_credits,get_similar_movies}.dart
 
 Data (infrastructure)
- ├── models/movie_model.dart         extends Movie, fromJson
- ├── datasources/home_remote_datasource.dart   Dio calls
- └── repositories/home_repository_impl.dart    try/catch → Either<Failure, T>
+ ├── models/{movie_detail_model,cast_member_model}.dart   fromJson
+ ├── datasources/detail_remote_datasource.dart            Dio calls
+ └── repositories/detail_repository_impl.dart             generic _guard<T> → Either<Failure, T>
 
 Presentation (Flutter)
- ├── bloc/home_{event,state,bloc}.dart   sealed events, single state, MovieStatus enum per slice
- ├── screens/home_screen.dart         CustomScrollView + slivers
- └── widgets/*.dart                   HeroSection, MovieCard, MovieSection, …
+ ├── bloc/detail_{event,state,bloc}.dart   per-section MovieStatus, parallel dispatch
+ ├── screens/detail_screen.dart            SingleChildScrollView + Stack for the overlap
+ └── widgets/
+      ├── detail_backdrop_header.dart
+      ├── detail_poster_title.dart
+      ├── detail_stats_row.dart
+      ├── detail_actions.dart
+      ├── detail_overview.dart
+      ├── detail_genres.dart
+      ├── detail_cast_section.dart / cast_avatar.dart
+      └── detail_similar_section.dart
 ```
 
 ### State management
 
-- **Sealed events + single state.** Each feature has one `State` class with per‑slice `status` fields (`MovieStatus.initial/loading/success/failure`) — avoids state explosion.
-- **App‑wide lazy singleton Blocs.** `HomeBloc` and `WatchlistBloc` are registered in `get_it` as `lazySingleton` and injected globally via `MultiBlocProvider` in `main.dart`. User returning to Home sees cached state, no re-fetch.
-- **`BlocProvider.value`** — ensures BlocProvider doesn't close bloc on widget dispose (the singleton keeps living).
+- **Sealed events + single state per feature.** Each feature has one `State` class with per-slice `status` fields (`MovieStatus.initial/loading/success/failure`) — avoids state explosion.
+- **App-wide lazy singleton Blocs for Home + Watchlist.** State persists across navigation — returning to Home sees cached data, no re-fetch. Registered in `get_it`, injected via `MultiBlocProvider` in `main.dart`, mounted with `BlocProvider.value` so the singleton isn't closed on widget dispose.
+- **Screen-scoped factory Blocs for Detail + Search.** Each `/movie/:id` push creates a fresh `DetailBloc`; each `/search` open creates a fresh `SearchBloc`. Transient state, no leak risk.
+- **Event transformers for debounce.** `SearchBloc` uses `stream_transform`'s `debounce(400ms).switchMap` so a burst of keystrokes collapses to one request, and in-flight stale requests get cancelled.
 
 ### Error handling
 
 `lib/core/error/failures.dart` defines both `Failure` (for `Either`) and `Exception` subclasses:
+
 - `ServerFailure` / `ServerException` (with status code)
 - `NetworkFailure` / `NetworkException`
 - `NotFoundFailure` / `NotFoundException` (404)
 - `UnauthenticatedFailure` / `UnauthenticatedException` (401)
 - `CacheFailure` / `CacheException`
 
-DioClient's error interceptor maps `DioException` to these custom exceptions. Repositories `try/catch` and return `Left(ServerFailure(…))` etc.
+`DioClient`'s error interceptor maps `DioException` → custom exceptions. Repository implementations wrap calls in a generic `_guard<T>()` that catches and returns `Left(Failure)`.
 
 ### Routing
 
-`go_router` with a `ShellRoute` wrapping `/` and `/watchlist` in a shared glass nav shell. Other routes (`/splash`, `/onboarding`, `/search`, `/movie/:id`, `/movies/:type`) are top‑level and render full‑screen.
+`go_router` with a `ShellRoute` wrapping `/` and `/watchlist` in a shared glass nav shell. Other routes are top-level and render full-screen.
 
 ```dart
 initialLocation: '/splash',
@@ -134,7 +192,7 @@ ShellRoute → GlassNavShell
  ├── /onboarding → OnboardingScreen
  ├── /search → SearchScreen
  ├── /movie/:id → DetailScreen
- └── /movies/:type → MoviesListScreen   // "See all"
+ └── /movies/:type → MoviesListScreen   // "See all" destination
 ```
 
 ---
@@ -144,8 +202,8 @@ ShellRoute → GlassNavShell
 ```
 lib/
 ├── core/
-│   ├── constants/              # Top-level const strings (URLs, Hive keys)
-│   ├── di/injection.dart       # get_it wiring
+│   ├── constants/              # Top-level const strings (URLs, image sizes, Hive keys)
+│   ├── di/injection.dart       # get_it wiring (singletons + factories)
 │   ├── error/failures.dart     # Failure + Exception hierarchies
 │   ├── network/                # DioClient, ApiEndpoints
 │   ├── router/                 # GoRouter, GlassNavShell
@@ -155,47 +213,48 @@ lib/
 │   └── usecase/usecase.dart    # UseCase<Success, Params> + NoParams
 │
 ├── features/
-│   ├── splash/presentation/screens/splash_screen.dart
-│   │       # Animated logo (gold/red glow), tilted film strip,
-│   │       # reads onboarding flag, routes accordingly
-│   │
-│   ├── onboarding/
-│   │   └── presentation/
-│   │       ├── screens/onboarding_screen.dart    # PageView, indicator, Get Started
-│   │       └── widgets/onboarding_step.dart      # Single slide with fade-in
+│   ├── splash/                 # Animated logo, routes via onboarding flag
+│   ├── onboarding/             # PageView + Get Started
 │   │
 │   ├── home/
-│   │   ├── data/{datasources,models,repositories}/
-│   │   ├── domain/{entities,repositories,usecases}/
+│   │   ├── data / domain /
 │   │   └── presentation/
-│   │       ├── bloc/home_{event,state,bloc}.dart
-│   │       ├── screens/
-│   │       │   ├── home_screen.dart               # Hero + 3 sections + grid
-│   │       │   └── movies_list_screen.dart        # "See all" destination
-│   │       └── widgets/
-│   │           ├── home_hero_section.dart         # PageView carousel
-│   │           ├── movie_card.dart                # Vertical poster card
-│   │           ├── movie_list_item.dart           # Horizontal list card (New Releases)
-│   │           ├── movie_section.dart             # Header + loading/error/success
-│   │           └── new_releases_grid.dart
+│   │       ├── bloc/           # home_{event,state,bloc}.dart — parallel dispatch
+│   │       ├── screens/        # home_screen, movies_list_screen
+│   │       └── widgets/        # home_hero_section, movie_card, movie_section,
+│   │                           # movie_list_item, new_releases_grid (+ NewReleasesShimmer)
 │   │
-│   ├── watchlist/
-│   │   ├── data/watchlist_storage.dart            # Hive wrapper
+│   ├── detail/
+│   │   ├── data / domain /
 │   │   └── presentation/
-│   │       ├── bloc/watchlist_{event,state,bloc}.dart
-│   │       ├── screens/watchlist_screen.dart      # Poster grid + empty state
-│   │       └── widgets/
-│   │           ├── watchlist_poster_card.dart     # Full poster + title overlay
-│   │           ├── watchlist_empty.dart           # Illustrated empty state
-│   │           └── watchlist_toggle_button.dart   # Reusable add/remove pill icon
+│   │       ├── bloc/           # detail_{event,state,bloc}.dart
+│   │       ├── screens/        # detail_screen
+│   │       └── widgets/        # backdrop_header, poster_title, stats_row, actions,
+│   │                           # overview, genres, cast_section, cast_avatar,
+│   │                           # similar_section
 │   │
-│   ├── search/   (placeholder, coming next)
-│   └── detail/   (placeholder, coming next)
+│   ├── search/
+│   │   ├── data / domain /
+│   │   └── presentation/
+│   │       ├── bloc/           # search_{event,state,bloc}.dart — debounce + switchMap
+│   │       ├── screens/        # search_screen — AnimatedSwitcher across 3 modes
+│   │       └── widgets/        # search_app_bar, active_filter_chip,
+│   │                           # genre_grid, genre_card,
+│   │                           # search_results_list, search_result_item,
+│   │                           # search_empty_state, search_error_state
+│   │
+│   └── watchlist/
+│       ├── data/watchlist_storage.dart       # Hive wrapper
+│       └── presentation/
+│           ├── bloc/           # watchlist_{event,state,bloc}.dart
+│           ├── screens/        # watchlist_screen — staggered grid
+│           └── widgets/        # watchlist_poster_card (Hero tag, 44dp remove),
+│                               # watchlist_empty, watchlist_toggle_button
 │
 ├── shared/
-│   └── widgets/popcorn_button.dart                # Gradient pill CTA with tap feedback
+│   └── widgets/popcorn_button.dart           # Gradient or outlined pill CTA
 │
-└── main.dart                                      # Bootstrap: dotenv → Hive → DI → runApp
+└── main.dart                                  # Bootstrap: dotenv → Hive → DI → runApp
 ```
 
 ---
@@ -204,7 +263,7 @@ lib/
 
 ### Prerequisites
 - Flutter **3.10+** (Dart 3.x)
-- A free TMDB v4 read‑access token — [grab one here](https://www.themoviedb.org/settings/api) or follow the [walkthrough on Medium](https://medium.com/@ozyurek.aydanil/how-to-get-a-tmdb-api-key-even-if-your-project-doesnt-exist-yet-fae8845f00c6) if it's your first time
+- A free TMDB v4 read-access token — [grab one here](https://www.themoviedb.org/settings/api) or follow the [walkthrough on Medium](https://medium.com/@ozyurek.aydanil/how-to-get-a-tmdb-api-key-even-if-your-project-doesnt-exist-yet-fae8845f00c6) if it's your first time
 
 ### Setup
 
@@ -244,22 +303,23 @@ Files are already in the repo; no download needed.
 
 - **Screens, not Pages.** Mobile idiom: `home_screen.dart` + `HomeScreen` class, `screens/` folders.
 - **Explicit types on declarations.** `final String x = …`, `for (int i = …)` — but collection literals and lambda params use inference where the target type is clear.
-- **Top‑level `const`** for plain data (URLs, Hive keys).
-- **`abstract final class`** for namespaced static members (`AppColors`, `AppTextStyles`, `ApiEndpoints`) — Dart 3 replacement for the old `X._()` private‑constructor trick.
+- **Top-level `const`** for plain data (URLs, Hive keys, image sizes).
+- **`abstract final class`** for namespaced static members (`AppColors`, `AppTextStyles`, `ApiEndpoints`, `MovieGenres`) — Dart 3 replacement for the old `X._()` private-constructor trick.
 - **Barrel files** (`<folder>/<folder>.dart`) at each layer for clean imports.
 - **Comments explain _why_, not _what_.** Names carry the "what."
+- **No emoji/gradient hardcoding** outside of brand (`AppColors.primaryGradient`, gold pill) — Search used to have per-genre gradient/emoji cards; now backdrop images do the work.
 
 ---
 
 ## Roadmap
 
 - [x] Architectural scaffolding (DI, router, theme, error types, typography)
-- [x] Splash + onboarding flow with Hive‑backed first‑run flag
-- [x] Home discovery (hero carousel + 3 sections + new releases grid)
-- [x] "See all" → Movies List screen
-- [x] Watchlist with local persistence and toggle button everywhere
-- [ ] **Detail screen** — backdrop, overview, cast, similar movies, trailer
-- [ ] **Search** — real text search + genre filters via `/discover/movie`
+- [x] Splash + onboarding flow with Hive-backed first-run flag
+- [x] Home discovery (hero carousel + sections + new releases grid + auto-advance + radial glow)
+- [x] "See all" → Movies List screen with loading/error/empty branching
+- [x] Watchlist with local persistence, shared-element Hero into detail, staggered entry
+- [x] **Detail screen** — backdrop, overlapping hero poster, stats, overview, genres, cast, similar
+- [x] **Search** — 3-mode flow (idle/typing/genre-filtered), backdrop-powered genre grid with Hive-cached deduped fetch, 400ms debounced text search
 - [ ] Pagination for Movies List (infinite scroll beyond page 1)
 - [ ] Tests — Bloc unit tests with `bloc_test` + `mocktail`
 - [ ] CI — GitHub Actions (`flutter analyze` + tests on PR)
@@ -271,4 +331,3 @@ Files are already in the repo; no download needed.
 - Movie data & images courtesy of [The Movie Database (TMDB)](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB.
 - Fonts: [Fraunces](https://fonts.google.com/specimen/Fraunces) and [Inter](https://fonts.google.com/specimen/Inter), SIL Open Font License.
 - Popcorn character illustrations — custom assets.
-

@@ -1,5 +1,19 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/detail/data/datasources/detail_remote_datasource.dart';
+import '../../features/detail/data/repositories/detail_repository_impl.dart';
+import '../../features/detail/domain/repositories/detail_repository.dart';
+import '../../features/detail/domain/usecases/get_movie_credits.dart';
+import '../../features/detail/domain/usecases/get_movie_detail.dart';
+import '../../features/detail/domain/usecases/get_similar_movies.dart';
+import '../../features/detail/presentation/bloc/detail_bloc.dart';
+import '../../features/search/data/datasources/search_remote_datasource.dart';
+import '../../features/search/data/repositories/search_repository_impl.dart';
+import '../../features/search/domain/repositories/search_repository.dart';
+import '../../features/search/domain/usecases/discover_by_genre.dart';
+import '../../features/search/domain/usecases/get_genre_backdrops.dart';
+import '../../features/search/domain/usecases/search_movies.dart';
+import '../../features/search/presentation/bloc/search_bloc.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
@@ -61,4 +75,52 @@ void configureDependencies() {
     () => WatchlistBloc(getIt<WatchlistStorage>())
       ..add(const WatchlistStarted()),
   );
+
+  // Detail feature graph
+  getIt.registerLazySingleton<DetailRemoteDataSource>(
+    () => DetailRemoteDataSourceImpl(getIt<DioClient>()),
+  );
+  getIt.registerLazySingleton<DetailRepository>(
+    () => DetailRepositoryImpl(getIt<DetailRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<GetMovieDetail>(
+    () => GetMovieDetail(getIt<DetailRepository>()),
+  );
+  getIt.registerLazySingleton<GetMovieCredits>(
+    () => GetMovieCredits(getIt<DetailRepository>()),
+  );
+  getIt.registerLazySingleton<GetSimilarMovies>(
+    () => GetSimilarMovies(getIt<DetailRepository>()),
+  );
+
+  // Factory — a fresh DetailBloc per route so state is transient per movie.
+  getIt.registerFactory<DetailBloc>(() => DetailBloc(
+        getIt<GetMovieDetail>(),
+        getIt<GetMovieCredits>(),
+        getIt<GetSimilarMovies>(),
+      ));
+
+  // Search feature graph
+  getIt.registerLazySingleton<SearchRemoteDataSource>(
+    () => SearchRemoteDataSourceImpl(getIt<DioClient>()),
+  );
+  getIt.registerLazySingleton<SearchRepository>(
+    () => SearchRepositoryImpl(getIt<SearchRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<SearchMovies>(
+    () => SearchMovies(getIt<SearchRepository>()),
+  );
+  getIt.registerLazySingleton<DiscoverByGenre>(
+    () => DiscoverByGenre(getIt<SearchRepository>()),
+  );
+  getIt.registerLazySingleton<GetGenreBackdrops>(
+    () => GetGenreBackdrops(getIt<SearchRepository>()),
+  );
+
+  // Factory — fresh SearchBloc per open.
+  getIt.registerFactory<SearchBloc>(() => SearchBloc(
+        getIt<SearchMovies>(),
+        getIt<DiscoverByGenre>(),
+        getIt<GetGenreBackdrops>(),
+      ));
 }

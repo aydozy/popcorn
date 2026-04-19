@@ -51,7 +51,9 @@ class GlassNavShell extends StatelessWidget {
                 left: 8,
                 right: 8,
                 top: 8,
-                bottom: 8 + homeIndicatorInset * 0.35,
+                // Full system inset, not a fraction — otherwise content sits
+                // under the iOS home indicator gesture zone on iPhone 14/15 Pro.
+                bottom: 8 + homeIndicatorInset,
               ),
               child: Row(
                 children: [

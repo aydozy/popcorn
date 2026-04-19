@@ -46,3 +46,6 @@ app.*.map.json
 
 # Environment
 .env
+
+# Claude Code
+.claude/

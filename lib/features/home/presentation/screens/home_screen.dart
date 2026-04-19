@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SliverToBoxAdapter(child: _Greeting()),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: HomeHeroSection()),
-            const SliverToBoxAdapter(child: SizedBox(height: 28)),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
             SliverToBoxAdapter(
               child: BlocBuilder<HomeBloc, HomeState>(
                 buildWhen: (HomeState a, HomeState b) =>
@@ -122,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (BuildContext context, HomeState state) {
                   return MovieSection(
                     title: 'New releases',
+                    titleBadge: const _NewBadge(),
                     status: state.trendingStatus,
                     movies: state.newReleases,
                     onRetry: () => context
@@ -129,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .add(const HomeTrendingRequested()),
                     builder: (List<Movie> movies) =>
                         NewReleasesGrid(movies: movies),
-                    loadingPlaceholder: const HorizontalMovieShimmer(),
+                    loadingPlaceholder: const NewReleasesShimmer(),
                     onSeeAllTap: () => context.push('/movies/new_releases'),
                   );
                 },
@@ -178,6 +179,36 @@ class _Greeting extends StatelessWidget {
             style: AppTextStyles.displayMedium,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NewBadge extends StatelessWidget {
+  const _NewBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowCinema,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        'NEW',
+        style: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+        ),
       ),
     );
   }

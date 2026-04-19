@@ -37,6 +37,9 @@ dependencies:
   shimmer: ^3.0.0
   flutter_staggered_animations: ^1.1.1
 
+  # Stream operators (search debounce)
+  stream_transform: ^2.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
