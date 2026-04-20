@@ -22,7 +22,7 @@ A modern Flutter movie discovery app. Browse trending films, explore genres, sea
   <img src="docs/screenshots/app_icon.png" width="160" alt="Popcorn app icon" />
 </p>
 
-Custom iOS + Android launch icons, generated from a single source. I wrote a short reminder on how I set this up end-to-end (asset sizing, `Info.plist` / `AndroidManifest.xml`, and the gotchas):
+Custom iOS + Android launch icons, generated from a single source. I wrote a short reminder on how I set this up end-to-end:
 
 **[How to change Flutter app icons (iOS & Android) — a quick reminder](https://medium.com/@ozyurek.aydanil/how-to-change-flutter-app-icons-ios-android-a-quick-reminder-7d1336b65724)** — Medium
 
