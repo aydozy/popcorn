@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/movie_rating.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
+import '../../../../shared/widgets/poster_fallback.dart';
 import '../../../watchlist/presentation/widgets/watchlist_toggle_button.dart';
 import '../../domain/entities/movie.dart';
 
@@ -36,19 +37,22 @@ class MovieCard extends StatelessWidget {
                   tag: 'movie_poster_${movie.id}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: movie.posterUrl.isEmpty
-                        ? _emptyPoster()
-                        : CachedNetworkImage(
-                            imageUrl: movie.posterUrl,
-                            width: width,
-                            height: height,
-                            fit: BoxFit.cover,
-                            placeholder: (BuildContext context, String url) =>
-                                _shimmerPlaceholder(),
-                            errorWidget: (BuildContext context, String url,
-                                    Object error) =>
-                                _emptyPoster(),
-                          ),
+                    child: SizedBox(
+                      width: width,
+                      height: height,
+                      child: movie.posterUrl.isEmpty
+                          ? const PosterFallback()
+                          : CachedNetworkImage(
+                              imageUrl: movie.posterUrl,
+                              fit: BoxFit.cover,
+                              placeholder:
+                                  (BuildContext context, String url) =>
+                                      const PopcornShimmer(),
+                              errorWidget: (BuildContext context, String url,
+                                      Object error) =>
+                                  const PosterFallback(),
+                            ),
+                    ),
                   ),
                 ),
                 Positioned(
@@ -66,45 +70,11 @@ class MovieCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.star_rounded,
-                    size: 14, color: AppColors.accentGold),
-                const SizedBox(width: 4),
-                Text(
-                  movie.voteAverage.toStringAsFixed(1),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+            MovieRating(movie.voteAverage),
           ],
         ),
       ),
     );
   }
 
-  Widget _shimmerPlaceholder() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
-      child: Container(
-        width: width,
-        height: height,
-        color: AppColors.surface,
-      ),
-    );
-  }
-
-  Widget _emptyPoster() {
-    return Container(
-      width: width,
-      height: height,
-      color: AppColors.surface,
-      alignment: Alignment.center,
-      child: const Icon(Icons.movie_outlined,
-          color: AppColors.textTertiary, size: 32),
-    );
-  }
 }

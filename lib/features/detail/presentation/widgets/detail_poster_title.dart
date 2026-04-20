@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
+import '../../../../shared/widgets/poster_fallback.dart';
 import '../../domain/entities/movie_detail.dart';
 
 class DetailPosterTitle extends StatelessWidget {
@@ -59,20 +60,23 @@ class DetailPosterTitle extends StatelessWidget {
   Widget _posterImage() {
     final String? url = movie?.posterUrl;
     if (url == null || url.isEmpty) {
-      return _shimmer();
+      return const SizedBox(
+        width: 120,
+        height: 180,
+        child: PopcornShimmer(),
+      );
     }
     return CachedNetworkImage(
       imageUrl: url,
       width: 120,
       height: 180,
       fit: BoxFit.cover,
-      placeholder: (_, _) => _shimmer(),
-      errorWidget: (_, _, _) => Container(
-        color: AppColors.surface,
-        alignment: Alignment.center,
-        child: const Icon(Icons.movie_outlined,
-            color: AppColors.textTertiary, size: 32),
+      placeholder: (_, _) => const SizedBox(
+        width: 120,
+        height: 180,
+        child: PopcornShimmer(),
       ),
+      errorWidget: (_, _, _) => const PosterFallback(),
     );
   }
 
@@ -145,22 +149,8 @@ class DetailPosterTitle extends StatelessWidget {
     );
   }
 
-  Widget _shimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
-      child: Container(
-        width: 120,
-        height: 180,
-        color: AppColors.surface,
-      ),
-    );
-  }
-
   Widget _shimmerLine({required double width, required double height}) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
+    return PopcornShimmer(
       child: Container(
         width: width,
         height: height,

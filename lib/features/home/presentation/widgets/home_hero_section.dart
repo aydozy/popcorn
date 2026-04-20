@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../../watchlist/presentation/bloc/watchlist_bloc.dart';
 import '../../../watchlist/presentation/bloc/watchlist_event.dart';
 import '../../../watchlist/presentation/bloc/watchlist_state.dart';
@@ -113,9 +113,8 @@ class _CarouselState extends State<_Carousel> {
       final int count = widget.state.heroMovies.length;
       if (count <= 1) return;
       final int current = (_pageController.page ?? 0).round();
-      final int next = (current + 1) % count;
       _pageController.animateToPage(
-        next,
+        (current + 1) % count,
         duration: const Duration(milliseconds: 520),
         curve: Curves.easeInOut,
       );
@@ -232,13 +231,13 @@ class _HeroCard extends StatelessWidget {
                   imageUrl: movie.backdropUrl,
                   fit: BoxFit.cover,
                   placeholder: (BuildContext context, String url) =>
-                      Container(color: AppColors.surface),
+                      const ColoredBox(color: AppColors.surface),
                   errorWidget:
                       (BuildContext context, String url, Object error) =>
-                          Container(color: AppColors.surface),
+                          const ColoredBox(color: AppColors.surface),
                 )
               else
-                Container(color: AppColors.surface),
+                const ColoredBox(color: AppColors.surface),
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -407,9 +406,7 @@ class _Shimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      child: PopcornShimmer(
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.surface,

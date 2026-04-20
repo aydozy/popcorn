@@ -1,13 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../shared/widgets/popcorn_button.dart';
+import '../../../../shared/widgets/app_error_state.dart';
+import '../../../../shared/widgets/glass_back_button.dart';
 import '../bloc/detail_bloc.dart';
 import '../bloc/detail_event.dart';
 import '../bloc/detail_state.dart';
@@ -46,8 +44,10 @@ class _DetailView extends StatelessWidget {
       body: BlocBuilder<DetailBloc, DetailState>(
         builder: (BuildContext context, DetailState state) {
           if (state.hasFullFailure) {
-            return _FullPageError(
-              message: state.errorMessage ?? 'Couldn\'t load this movie',
+            return AppErrorState.icon(
+              icon: Icons.theaters_outlined,
+              title: 'Couldn\'t load this movie',
+              message: state.errorMessage,
               onRetry: () => context
                   .read<DetailBloc>()
                   .add(DetailRefreshed(movieId)),
@@ -90,8 +90,6 @@ class _DetailView extends StatelessWidget {
                             status: state.similarStatus,
                             movies: state.similarMovies,
                           ),
-                          const SizedBox(height: 24),
-                          const _Footer(),
                           SizedBox(
                             height: MediaQuery.of(context).padding.bottom + 16,
                           ),
@@ -108,7 +106,7 @@ class _DetailView extends StatelessWidget {
                   bottom: false,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 12, top: 8),
-                    child: _GlassBackButton(onTap: () => context.pop()),
+                    child: GlassBackButton(onTap: () => context.pop()),
                   ),
                 ),
               ),
@@ -120,97 +118,4 @@ class _DetailView extends StatelessWidget {
   }
 }
 
-class _GlassBackButton extends StatelessWidget {
-  final VoidCallback onTap;
 
-  const _GlassBackButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Back',
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              width: 48,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.55),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  const _Footer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Text(
-        'Data provided by TMDB',
-        textAlign: TextAlign.center,
-        style: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.textSecondary,
-        ),
-      ),
-    );
-  }
-}
-
-class _FullPageError extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _FullPageError({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.theaters_outlined,
-              size: 64,
-              color: AppColors.textTertiary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Couldn\'t load this movie',
-              style: AppTextStyles.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: AppTextStyles.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            PopcornButton(label: 'Try again', onPressed: onRetry),
-          ],
-        ),
-      ),
-    );
-  }
-}

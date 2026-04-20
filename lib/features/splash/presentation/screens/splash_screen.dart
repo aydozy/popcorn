@@ -96,8 +96,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigate() {
     if (!mounted) return;
-    final bool seen = getIt<OnboardingStorage>().hasSeen();
-    context.go(seen ? '/' : '/onboarding');
+    context.go(
+      getIt<OnboardingStorage>().hasSeen() ? '/' : '/onboarding',
+    );
   }
 
   @override

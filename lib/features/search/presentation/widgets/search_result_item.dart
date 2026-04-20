@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/movie_rating.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
+import '../../../../shared/widgets/poster_fallback.dart';
 import '../../../home/domain/entities/movie.dart';
 import '../../../watchlist/presentation/widgets/watchlist_toggle_button.dart';
 import '../../domain/entities/genre_category.dart';
@@ -38,39 +40,19 @@ class SearchResultItem extends StatelessWidget {
   Widget _poster() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: movie.posterUrl.isEmpty
-          ? _emptyPoster()
-          : CachedNetworkImage(
-              imageUrl: movie.posterUrl,
-              width: 70,
-              height: 105,
-              fit: BoxFit.cover,
-              placeholder: (_, _) => _shimmer(),
-              errorWidget: (_, _, _) => _emptyPoster(),
-            ),
-    );
-  }
-
-  Widget _shimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
-      child: Container(
+      child: SizedBox(
         width: 70,
         height: 105,
-        color: AppColors.surface,
+        child: movie.posterUrl.isEmpty
+            ? const PosterFallback(iconSize: 24)
+            : CachedNetworkImage(
+                imageUrl: movie.posterUrl,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => const PopcornShimmer(),
+                errorWidget: (_, _, _) =>
+                    const PosterFallback(iconSize: 24),
+              ),
       ),
-    );
-  }
-
-  Widget _emptyPoster() {
-    return Container(
-      width: 70,
-      height: 105,
-      color: AppColors.surface,
-      alignment: Alignment.center,
-      child: const Icon(Icons.movie_outlined,
-          color: AppColors.textTertiary, size: 24),
     );
   }
 
@@ -106,17 +88,7 @@ class SearchResultItem extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 4),
-        Row(
-          children: [
-            const Icon(Icons.star_rounded,
-                size: 14, color: AppColors.accentGold),
-            const SizedBox(width: 4),
-            Text(
-              movie.voteAverage.toStringAsFixed(1),
-              style: AppTextStyles.rating.copyWith(fontSize: 13),
-            ),
-          ],
-        ),
+        MovieRating(movie.voteAverage),
         if (movie.overview.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(

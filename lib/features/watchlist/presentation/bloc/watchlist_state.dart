@@ -18,5 +18,5 @@ final class WatchlistState extends Equatable {
   bool get isEmpty => movies.isEmpty;
 
   @override
-  List<Object?> get props => [movies, ids];
+  List<Object> get props => [movies, ids];
 }

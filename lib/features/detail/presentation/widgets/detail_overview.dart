@@ -51,24 +51,17 @@ class _DetailOverviewState extends State<DetailOverview> {
                   ),
                   if (overflows) ...[
                     const SizedBox(height: 4),
-                    Semantics(
-                      button: true,
-                      label: _expanded
-                          ? 'Show less of the overview'
-                          : 'Read the full overview',
-                      child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _expanded = !_expanded),
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 4),
-                          child: Text(
-                            _expanded ? 'Show less' : 'Read more',
-                            style: AppTextStyles.labelMedium.copyWith(
-                              color: AppColors.primaryRose,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    GestureDetector(
+                      onTap: () => setState(() => _expanded = !_expanded),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 4),
+                        child: Text(
+                          _expanded ? 'Show less' : 'Read more',
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: AppColors.primaryRose,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),

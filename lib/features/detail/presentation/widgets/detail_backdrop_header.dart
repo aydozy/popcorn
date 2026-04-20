@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/movie_detail.dart';
 
 class DetailBackdropHeader extends StatelessWidget {
@@ -37,21 +37,14 @@ class DetailBackdropHeader extends StatelessWidget {
   Widget _backdrop() {
     final String? url = movie?.backdropUrl;
     if (url == null || url.isEmpty) {
-      return _shimmer();
+      return const PopcornShimmer();
     }
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
-      placeholder: (_, _) => _shimmer(),
-      errorWidget: (_, _, _) => Container(color: AppColors.surface),
-    );
-  }
-
-  Widget _shimmer() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
-      child: Container(color: AppColors.surface),
+      placeholder: (_, _) => const PopcornShimmer(),
+      errorWidget: (_, _, _) =>
+          const ColoredBox(color: AppColors.surface),
     );
   }
 }

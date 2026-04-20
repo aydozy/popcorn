@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/movie.dart';
 import 'movie_list_item.dart';
 
@@ -57,9 +57,7 @@ class NewReleasesShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      child: PopcornShimmer(
         child: Column(
           children: [
             for (int i = 0; i < rows; i++) ...[

@@ -19,7 +19,7 @@ class WatchlistScreen extends StatelessWidget {
       body: BlocBuilder<WatchlistBloc, WatchlistState>(
         builder: (BuildContext context, WatchlistState state) {
           if (state.isEmpty) {
-            return const SafeArea(child: WatchlistEmpty());
+            return const WatchlistEmpty();
           }
           return AnimationLimiter(
             child: CustomScrollView(

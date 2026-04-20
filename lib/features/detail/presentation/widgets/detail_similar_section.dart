@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../../home/domain/entities/movie.dart';
 import '../../../home/presentation/widgets/movie_card.dart';
 import '../bloc/detail_state.dart';
@@ -61,9 +61,7 @@ class DetailSimilarSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: 4,
       separatorBuilder: (_, _) => const SizedBox(width: 12),
-      itemBuilder: (_, _) => Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      itemBuilder: (_, _) => PopcornShimmer(
         child: Container(
           width: 110,
           height: 165,

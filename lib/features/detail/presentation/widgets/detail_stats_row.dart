@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/movie_detail.dart';
 
 class DetailStatsRow extends StatelessWidget {
@@ -56,9 +56,7 @@ class DetailStatsRow extends StatelessWidget {
   }
 
   Widget _shimmerItem() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
+    return PopcornShimmer(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
