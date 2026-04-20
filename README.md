@@ -16,6 +16,18 @@ A modern Flutter movie discovery app. Browse trending films, explore genres, sea
 
 ---
 
+## 📱 App Icon
+
+<p align="center">
+  <img src="docs/screenshots/app_icon.png" width="160" alt="Popcorn app icon" />
+</p>
+
+Custom iOS + Android launch icons, generated from a single source. I wrote a short reminder on how I set this up end-to-end (asset sizing, `Info.plist` / `AndroidManifest.xml`, and the gotchas):
+
+**[How to change Flutter app icons (iOS & Android) — a quick reminder](https://medium.com/@ozyurek.aydanil/how-to-change-flutter-app-icons-ios-android-a-quick-reminder-7d1336b65724)** — Medium
+
+---
+
 ## ✨ Screenshots
 
 ### Splash + Onboarding
@@ -301,13 +313,63 @@ Files are already in the repo; no download needed.
 
 ## Project Conventions
 
-- **Screens, not Pages.** Mobile idiom: `home_screen.dart` + `HomeScreen` class, `screens/` folders.
-- **Explicit types on declarations.** `final String x = …`, `for (int i = …)` — but collection literals and lambda params use inference where the target type is clear.
-- **Top-level `const`** for plain data (URLs, Hive keys, image sizes).
-- **`abstract final class`** for namespaced static members (`AppColors`, `AppTextStyles`, `ApiEndpoints`, `MovieGenres`) — Dart 3 replacement for the old `X._()` private-constructor trick.
-- **Barrel files** (`<folder>/<folder>.dart`) at each layer for clean imports.
-- **Comments explain _why_, not _what_.** Names carry the "what."
-- **No emoji/gradient hardcoding** outside of brand (`AppColors.primaryGradient`, gold pill) — Search used to have per-genre gradient/emoji cards; now backdrop images do the work.
+Conventions are defaults, not dogma — but they hold across the codebase and make new slices easy to predict.
+
+### Naming + structure
+
+- **Screens, not Pages.** Mobile idiom: `home_screen.dart` → `class HomeScreen`, lives in `screens/` folder.
+- **`feature/data/` + `feature/domain/` + `feature/presentation/`** slices for anything with real rules. Splash, Onboarding, and core/storage are simpler — single classes.
+- **Barrel files** (`<folder>/<folder>.dart`) at each layer so consumers can `import '…/features/detail/detail.dart'` without knowing the internal layout.
+
+### Dart 3 features we lean on
+
+- **Sealed classes for events.** `sealed class HomeEvent`, `SearchEvent`, `DetailEvent`, `WatchlistEvent` — subclasses are `final class`, compiler enforces exhaustive handling in the bloc.
+- **`final class` for states.** Single state per feature, `Equatable`, immutable via `copyWith`. Not sealed — we use status enum fields instead of state-per-status classes (see below).
+- **Sealed `Either<L, R>`** in `lib/core/types/either.dart` with `Left` / `Right` subclasses and a `fold<T>()` method. No `fpdart`.
+- **Switch expressions** for status-driven UI: `switch (state.status) { MovieStatus.loading => … }` — no nested `if/else` ladders.
+- **Wildcard `_` parameters** for unused callback args (e.g. `placeholder: (_, _) => …`).
+
+### Top-level first, `abstract final class` only when namespacing earns its keep
+
+Dart's guidance is "avoid classes with only static members" — prefer top-level declarations. We follow that by default:
+
+- **Top-level `const`** for plain strings that read fine unprefixed: `tmdbBaseUrl`, `posterMedium`, `backdropLarge`, `watchlistBox`, `settingsBox`, `genreBackdropsBox`, … — all in `lib/core/constants/app_constants.dart`, zero classes.
+- **`abstract final class`** only where the *group* is the semantic unit and the prefix improves readability: `AppColors.primaryRose`, `AppTextStyles.headlineMedium`, `AppTheme.darkTheme`, `ApiEndpoints.movieDetail(id)`, `MovieGenres.all`. A bare `primaryRose` or `trending` at top level would be noise; the class name *is* the namespace.
+
+Rule of thumb: if you catch yourself importing three related constants together, consider an `abstract final class`; if each stands on its own, keep it top-level.
+
+### State modeling
+
+- **One `State` class per feature, with status enums per section.** `HomeState` has `trendingStatus`, `popularStatus`, `topRatedStatus`, `genresStatus` — each section loads independently, failures don't cascade. Same pattern in `DetailState` (movieStatus / castStatus / similarStatus) and `SearchState` (resultsStatus / backdropsStatus).
+- **`MovieStatus` enum is shared**, defined once in `home_state.dart` and re-exported (`export 'home_state.dart' show MovieStatus;`) from every other state file. One enum, three names would be worse.
+- **`copyWith` is the only mutation path.** Events → bloc handler → `emit(state.copyWith(...))`. Never mutate collections in place.
+
+### Data layer
+
+- **`Either<Failure, T>` at the repository boundary.** Data sources throw; repositories wrap in a generic `_guard<T>(Future<T> Function())` that catches each `*Exception` and maps to the matching `*Failure`. Presentation never sees exceptions.
+- **Datasources return models; repositories return entities.** `MovieModel extends Movie` + `fromJson`; UI code touches `Movie` only.
+
+### Dependency injection
+
+- **Two lifecycles in `lib/core/di/injection.dart`:**
+  - `registerLazySingleton` for `HomeBloc` + `WatchlistBloc` — state persists across navigation, mounted with `BlocProvider.value`.
+  - `registerFactory` for `DetailBloc` + `SearchBloc` — fresh instance per `/movie/:id` push or `/search` open.
+- **All usecases + repos + datasources are lazy singletons.** They're stateless; there's one of each at most.
+
+### Styling
+
+- **No hardcoded colors in widgets.** Everything goes through `AppColors.*`. Genre tiles used to ship their own gradient stops in `MovieGenres`; we removed them once backdrops replaced the flat design.
+- **Fraunces for display**, Inter for body. Never both in one heading.
+
+### Comments
+
+- **Why, not what.** Names carry the "what."
+- A comment earns its keep if it explains a non-obvious trade-off, a rule chosen for external reasons (e.g. "sequential because dedup requires knowing what's used"), or a hidden invariant. Otherwise deleted.
+
+### Accessibility defaults
+
+- **44×44 minimum tap targets** on everything the user has to hit — back buttons, read-more links, remove chips, genre cards. Visual size can be smaller; hit target is not.
+- **`Semantics(button: true, label: ...)`** on any icon-only tappable.
 
 ---
 
