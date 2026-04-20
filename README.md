@@ -80,7 +80,7 @@ Empty state uses `problem_popcorn.png`; network failure renders an inline retry 
   <img src="docs/screenshots/watchlist.png" width="220" alt="Watchlist — 2-col poster grid with staggered entry" />
 </p>
 
-2-column poster grid with staggered fade+scale entry animation. Each poster carries the same Hero tag (`movie_poster_${id}`) as Home's `MovieCard`, so navigating Watchlist → Detail gets a shared-element transition too. Tap the bookmark chip to remove (44×44 hit target, `Semantics` labels, haptic feedback). Persisted via Hive across app restarts.
+2-column poster grid with staggered fade+scale entry animation. Each poster carries the same Hero tag (`movie_poster_${id}`) as Home's `MovieCard`, so navigating Watchlist → Detail gets a shared-element transition too. Tap the bookmark chip to remove, with haptic feedback. Persisted via Hive across app restarts.
 
 ---
 
@@ -96,7 +96,6 @@ Empty state uses `problem_popcorn.png`; network failure renders an inline retry 
 - 📱 **Responsive layouts** — Horizontal sections, vertical poster grids, intrinsic-height rows, matching shimmer silhouettes to avoid layout shift
 - 🔄 **Pull-to-refresh** on Home
 - 🧠 **Smart caching** — App-wide Bloc singletons for Home/Watchlist keep state across navigation; Hive-cached genre backdrops never re-fetch; factory-scoped blocs for Detail/Search so each entry starts fresh
-- ♿ **Accessibility** — 44dp+ touch targets on primary actions, `Semantics` labels on back buttons, read-more, filter chips, watchlist toggles
 
 ---
 
@@ -155,7 +154,7 @@ Domain (pure Dart)
 Data (infrastructure)
  ├── models/{movie_detail_model,cast_member_model}.dart   fromJson
  ├── datasources/detail_remote_datasource.dart            Dio calls
- └── repositories/detail_repository_impl.dart             generic _guard<T> → Either<Failure, T>
+ └── repositories/detail_repository_impl.dart             wraps calls with shared guard<T>()
 
 Presentation (Flutter)
  ├── bloc/detail_{event,state,bloc}.dart   per-section MovieStatus, parallel dispatch
@@ -180,15 +179,7 @@ Presentation (Flutter)
 
 ### Error handling
 
-`lib/core/error/failures.dart` defines both `Failure` (for `Either`) and `Exception` subclasses:
-
-- `ServerFailure` / `ServerException` (with status code)
-- `NetworkFailure` / `NetworkException`
-- `NotFoundFailure` / `NotFoundException` (404)
-- `UnauthenticatedFailure` / `UnauthenticatedException` (401)
-- `CacheFailure` / `CacheException`
-
-`DioClient`'s error interceptor maps `DioException` → custom exceptions. Repository implementations wrap calls in a generic `_guard<T>()` that catches and returns `Left(Failure)`.
+Typed `Failure` (for `Either`) and matching `Exception` hierarchies live in `lib/core/error/failures.dart` — server / network / not-found / unauthenticated / cache. `DioClient`'s interceptor maps `DioException` → these exceptions, and every repository funnels calls through `guard<T>()` in `lib/core/error/guard.dart` so exceptions become `Left(Failure)` at the domain boundary. UI code never sees a `throw`.
 
 ### Routing
 
@@ -216,7 +207,9 @@ lib/
 ├── core/
 │   ├── constants/              # Top-level const strings (URLs, image sizes, Hive keys)
 │   ├── di/injection.dart       # get_it wiring (singletons + factories)
-│   ├── error/failures.dart     # Failure + Exception hierarchies
+│   ├── error/
+│   │   ├── failures.dart       # Failure + Exception hierarchies
+│   │   └── guard.dart          # guard<T>(fetch) — shared data→domain boundary
 │   ├── network/                # DioClient, ApiEndpoints
 │   ├── router/                 # GoRouter, GlassNavShell
 │   ├── storage/                # Simple Hive wrappers (onboarding flag)
@@ -260,11 +253,19 @@ lib/
 │       └── presentation/
 │           ├── bloc/           # watchlist_{event,state,bloc}.dart
 │           ├── screens/        # watchlist_screen — staggered grid
-│           └── widgets/        # watchlist_poster_card (Hero tag, 44dp remove),
+│           └── widgets/        # watchlist_poster_card (Hero-tagged),
 │                               # watchlist_empty, watchlist_toggle_button
 │
 ├── shared/
-│   └── widgets/popcorn_button.dart           # Gradient or outlined pill CTA
+│   └── widgets/                # Cross-feature widgets
+│       ├── popcorn_button.dart         # Gradient / outlined pill CTA
+│       ├── popcorn_shimmer.dart        # Shimmer wrapper w/ default surface fill
+│       ├── poster_fallback.dart        # Missing-poster placeholder (icon + bg)
+│       ├── glass_back_button.dart      # Blurred 48dp round back button
+│       ├── pressable_scale.dart        # Tap-to-shrink + haptic wrapper
+│       ├── movie_rating.dart           # Star + voteAverage row
+│       ├── app_empty_state.dart        # Image + title + subtitle (full screen)
+│       └── app_error_state.dart        # Icon/image + title + retry (PopcornButton)
 │
 └── main.dart                                  # Bootstrap: dotenv → Hive → DI → runApp
 ```
@@ -319,7 +320,6 @@ Conventions are defaults, not dogma — but they hold across the codebase and ma
 
 - **Screens, not Pages.** Mobile idiom: `home_screen.dart` → `class HomeScreen`, lives in `screens/` folder.
 - **`feature/data/` + `feature/domain/` + `feature/presentation/`** slices for anything with real rules. Splash, Onboarding, and core/storage are simpler — single classes.
-- **Barrel files** (`<folder>/<folder>.dart`) at each layer so consumers can `import '…/features/detail/detail.dart'` without knowing the internal layout.
 
 ### Dart 3 features we lean on
 
@@ -346,30 +346,17 @@ Rule of thumb: if you catch yourself importing three related constants together,
 
 ### Data layer
 
-- **`Either<Failure, T>` at the repository boundary.** Data sources throw; repositories wrap in a generic `_guard<T>(Future<T> Function())` that catches each `*Exception` and maps to the matching `*Failure`. Presentation never sees exceptions.
+- **`Either<Failure, T>` at the repository boundary.** Data sources throw; repositories funnel calls through the shared `guard<T>()` in `lib/core/error/guard.dart` that catches each `*Exception` and maps to the matching `*Failure`. Presentation never sees exceptions.
 - **Datasources return models; repositories return entities.** `MovieModel extends Movie` + `fromJson`; UI code touches `Movie` only.
-
-### Dependency injection
-
-- **Two lifecycles in `lib/core/di/injection.dart`:**
-  - `registerLazySingleton` for `HomeBloc` + `WatchlistBloc` — state persists across navigation, mounted with `BlocProvider.value`.
-  - `registerFactory` for `DetailBloc` + `SearchBloc` — fresh instance per `/movie/:id` push or `/search` open.
-- **All usecases + repos + datasources are lazy singletons.** They're stateless; there's one of each at most.
 
 ### Styling
 
 - **No hardcoded colors in widgets.** Everything goes through `AppColors.*`. Genre tiles used to ship their own gradient stops in `MovieGenres`; we removed them once backdrops replaced the flat design.
 - **Fraunces for display**, Inter for body. Never both in one heading.
 
-### Comments
+### Touch targets
 
-- **Why, not what.** Names carry the "what."
-- A comment earns its keep if it explains a non-obvious trade-off, a rule chosen for external reasons (e.g. "sequential because dedup requires knowing what's used"), or a hidden invariant. Otherwise deleted.
-
-### Accessibility defaults
-
-- **44×44 minimum tap targets** on everything the user has to hit — back buttons, read-more links, remove chips, genre cards. Visual size can be smaller; hit target is not.
-- **`Semantics(button: true, label: ...)`** on any icon-only tappable.
+- **44×44 minimum tap targets** on anything the user has to hit — back buttons, read-more links, remove chips, genre cards. Visual size can be smaller; hit target is not.
 
 ---
 

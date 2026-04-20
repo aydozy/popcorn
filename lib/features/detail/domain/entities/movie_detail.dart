@@ -57,10 +57,8 @@ class MovieDetail extends Equatable {
 
   // TMDB popularity is an unbounded positive value (typically 0–400+). We divide
   // by 4 and clamp to 100 as a rough "% liked it" proxy for the stats row.
-  String get popularityPercent {
-    final double normalized = (popularity / 4).clamp(0, 100);
-    return '${normalized.toStringAsFixed(0)}%';
-  }
+  String get popularityPercent =>
+      '${(popularity / 4).clamp(0, 100).toStringAsFixed(0)}%';
 
   Movie toMovie() => Movie(
         id: id,

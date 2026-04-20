@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../../home/domain/entities/movie.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
@@ -114,9 +114,7 @@ class _ShimmerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      child: PopcornShimmer(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

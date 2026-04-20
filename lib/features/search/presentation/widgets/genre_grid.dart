@@ -20,10 +20,6 @@ class GenreGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<GenreCategory> genres = MovieGenres.all;
-    final bool loading = backdropsStatus == MovieStatus.loading ||
-        backdropsStatus == MovieStatus.initial;
-
     return AnimationLimiter(
       child: GridView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
@@ -33,9 +29,9 @@ class GenreGrid extends StatelessWidget {
           crossAxisSpacing: 12,
           childAspectRatio: 1.5,
         ),
-        itemCount: genres.length,
+        itemCount: MovieGenres.all.length,
         itemBuilder: (BuildContext context, int index) {
-          final GenreCategory genre = genres[index];
+          final GenreCategory genre = MovieGenres.all[index];
           return AnimationConfiguration.staggeredGrid(
             position: index,
             columnCount: 2,
@@ -46,7 +42,8 @@ class GenreGrid extends StatelessWidget {
                 child: GenreCard(
                   genre: genre,
                   backdropPath: backdrops[genre.tmdbId],
-                  loading: loading,
+                  loading: backdropsStatus == MovieStatus.loading ||
+        backdropsStatus == MovieStatus.initial,
                   onTap: () => context
                       .read<SearchBloc>()
                       .add(SearchGenreSelected(genre)),

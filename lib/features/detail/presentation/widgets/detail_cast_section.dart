@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/cast_member.dart';
 import '../bloc/detail_state.dart';
 import 'cast_avatar.dart';
@@ -60,9 +60,7 @@ class DetailCastSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: 5,
       separatorBuilder: (_, _) => const SizedBox(width: 16),
-      itemBuilder: (_, _) => Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      itemBuilder: (_, _) => PopcornShimmer(
         child: SizedBox(
           width: 96,
           child: Column(

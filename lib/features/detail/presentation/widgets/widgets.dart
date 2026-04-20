@@ -1,0 +1,9 @@
+export 'cast_avatar.dart';
+export 'detail_actions.dart';
+export 'detail_backdrop_header.dart';
+export 'detail_cast_section.dart';
+export 'detail_genres.dart';
+export 'detail_overview.dart';
+export 'detail_poster_title.dart';
+export 'detail_similar_section.dart';
+export 'detail_stats_row.dart';

@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/movie_rating.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
+import '../../../../shared/widgets/poster_fallback.dart';
 import '../../../watchlist/presentation/widgets/watchlist_toggle_button.dart';
 import '../../domain/entities/movie.dart';
 
@@ -29,19 +31,27 @@ class MovieListItem extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: movie.posterUrl.isEmpty
-                  ? _emptyPoster()
-                  : CachedNetworkImage(
-                      imageUrl: movie.posterUrl,
-                      width: 56,
-                      height: 84,
-                      fit: BoxFit.cover,
-                      placeholder: (BuildContext context, String url) =>
-                          _shimmerPlaceholder(),
-                      errorWidget:
-                          (BuildContext context, String url, Object error) =>
-                              _emptyPoster(),
-                    ),
+              child: SizedBox(
+                width: 56,
+                height: 84,
+                child: movie.posterUrl.isEmpty
+                    ? const PosterFallback(
+                        iconSize: 20,
+                        backgroundColor: AppColors.surfaceElevated,
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: movie.posterUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (BuildContext context, String url) =>
+                            const PopcornShimmer(),
+                        errorWidget: (BuildContext context, String url,
+                                Object error) =>
+                            const PosterFallback(
+                          iconSize: 20,
+                          backgroundColor: AppColors.surfaceElevated,
+                        ),
+                      ),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -65,19 +75,7 @@ class MovieListItem extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded,
-                          size: 14, color: AppColors.accentGold),
-                      const SizedBox(width: 4),
-                      Text(
-                        movie.voteAverage.toStringAsFixed(1),
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+                  MovieRating(movie.voteAverage),
                 ],
               ),
             ),
@@ -89,26 +87,4 @@ class MovieListItem extends StatelessWidget {
     );
   }
 
-  Widget _shimmerPlaceholder() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surface,
-      highlightColor: AppColors.surfaceElevated,
-      child: Container(
-        width: 56,
-        height: 84,
-        color: AppColors.surface,
-      ),
-    );
-  }
-
-  Widget _emptyPoster() {
-    return Container(
-      width: 56,
-      height: 84,
-      color: AppColors.surfaceElevated,
-      alignment: Alignment.center,
-      child: const Icon(Icons.movie_outlined,
-          color: AppColors.textTertiary, size: 20),
-    );
-  }
 }

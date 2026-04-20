@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/error/guard.dart';
 import '../../../../core/types/either.dart';
 import '../../../home/domain/entities/movie.dart';
 import '../../domain/entities/genre_category.dart';
@@ -13,33 +14,13 @@ class SearchRepositoryImpl implements SearchRepository {
 
   SearchRepositoryImpl(this._dataSource);
 
-  Future<Either<Failure, T>> _guard<T>(Future<T> Function() fetch) async {
-    try {
-      final T value = await fetch();
-      return Right(value);
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message ?? 'No internet connection'));
-    } on UnauthenticatedException {
-      return const Left(UnauthenticatedFailure());
-    } on NotFoundException {
-      return const Left(NotFoundFailure());
-    } on ServerException catch (e) {
-      return Left(ServerFailure(
-        e.message ?? 'Server error',
-        statusCode: e.statusCode,
-      ));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
   @override
   Future<Either<Failure, List<Movie>>> search(String query) =>
-      _guard<List<Movie>>(() => _dataSource.search(query));
+      guard<List<Movie>>(() => _dataSource.search(query));
 
   @override
   Future<Either<Failure, List<Movie>>> discover(int genreId) =>
-      _guard<List<Movie>>(() => _dataSource.discover(genreId));
+      guard<List<Movie>>(() => _dataSource.discover(genreId));
 
   @override
   Future<Either<Failure, Map<int, String>>> getGenreBackdrops() async {
@@ -47,7 +28,7 @@ class SearchRepositoryImpl implements SearchRepository {
     final Map<int, String>? cached = _readCache(box);
     if (cached != null && cached.isNotEmpty) return Right(cached);
 
-    return _guard<Map<int, String>>(() async {
+    return guard<Map<int, String>>(() async {
       // Sequential by design: each genre walks its top results looking for a
       // movie not yet claimed by an earlier genre. Parallel fetching would
       // need a merge step with conflict resolution and isn't worth the

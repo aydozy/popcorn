@@ -78,10 +78,8 @@ class CastAvatar extends StatelessWidget {
       ),
       child: Text(
         member.initials,
-        style: const TextStyle(
-          fontFamily: 'Fraunces',
+        style: AppTextStyles.headlineLarge.copyWith(
           fontSize: 24,
-          fontWeight: FontWeight.w700,
           color: AppColors.background,
         ),
       ),

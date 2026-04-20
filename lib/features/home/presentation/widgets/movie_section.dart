@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/home_state.dart';
 
@@ -56,20 +56,16 @@ class MovieSection extends StatelessWidget {
                 ),
               ),
               if (onSeeAllTap != null)
-                Semantics(
-                  button: true,
-                  label: 'See all $title',
-                  child: GestureDetector(
-                    onTap: onSeeAllTap,
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-                      child: Text(
-                        'See all →',
-                        style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.primaryRose,
-                        ),
+                GestureDetector(
+                  onTap: onSeeAllTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 4),
+                    child: Text(
+                      'See all →',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.primaryRose,
                       ),
                     ),
                   ),
@@ -141,9 +137,7 @@ class HorizontalMovieShimmer extends StatelessWidget {
         itemCount: count,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (BuildContext context, int i) {
-          return Shimmer.fromColors(
-            baseColor: AppColors.surface,
-            highlightColor: AppColors.surfaceElevated,
+          return PopcornShimmer(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

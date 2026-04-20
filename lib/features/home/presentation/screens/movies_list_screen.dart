@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../shared/widgets/app_error_state.dart';
+import '../../../../shared/widgets/popcorn_shimmer.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -92,7 +93,12 @@ class MoviesListScreen extends StatelessWidget {
             case MovieStatus.loading:
               return const _GridShimmer();
             case MovieStatus.failure:
-              return _ErrorBody(onRetry: () => _retry(context));
+              return AppErrorState.icon(
+                icon: Icons.cloud_off_rounded,
+                iconSize: 48,
+                title: 'Couldn\'t load movies',
+                onRetry: () => _retry(context),
+              );
             case MovieStatus.success:
               if (movies.isEmpty) {
                 return Center(
@@ -162,9 +168,7 @@ class _GridShimmer extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       physics: const NeverScrollableScrollPhysics(),
-      child: Shimmer.fromColors(
-        baseColor: AppColors.surface,
-        highlightColor: AppColors.surfaceElevated,
+      child: PopcornShimmer(
         child: Column(
           children: [
             for (int i = 0; i < 4; i++) ...[
@@ -203,35 +207,3 @@ class _GridShimmer extends StatelessWidget {
   }
 }
 
-class _ErrorBody extends StatelessWidget {
-  final VoidCallback onRetry;
-
-  const _ErrorBody({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off_rounded,
-                color: AppColors.textTertiary, size: 48),
-            const SizedBox(height: 16),
-            Text('Couldn\'t load movies', style: AppTextStyles.headlineMedium),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(
-                'Retry',
-                style: AppTextStyles.labelMedium
-                    .copyWith(color: AppColors.primaryRose),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
