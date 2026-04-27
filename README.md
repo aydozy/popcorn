@@ -6,7 +6,7 @@
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-10B981)
 ![Status](https://img.shields.io/badge/Status-Feature_Complete-10B981)
 
-A modern Flutter movie discovery app. Browse trending films, explore genres, search, build a personal watchlist, and dive into rich movie details — all powered by [TMDB](https://www.themoviedb.org/).
+A modern Flutter movie discovery app. Browse trending films, explore genres, search, build a personal watchlist, and dive into rich movie details all powered by [TMDB](https://www.themoviedb.org/).
 
 > 📝 **New here? Start with the API key.**
 > Popcorn needs a free TMDB v4 read-access token. I wrote a step-by-step guide that walks you through the whole thing, even if you haven't created the project yet:
